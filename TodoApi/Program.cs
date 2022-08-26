@@ -6,14 +6,20 @@ builder.Services.AddDbContext<TodoDb>(opt => opt.UseInMemoryDatabase("TodoList")
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 var app = builder.Build();
 
-app.MapGet("/", () => 
+app.MapGet("/", (HttpRequest request) => 
 {
+    var ipInfo = new IpInfo();
     string hostName = Dns.GetHostName(); // Retrive the Name of HOST
     Console.WriteLine(hostName);
-    // Get the IP
+    // Get the private IP
     string myIP = Dns.GetHostEntry(hostName).AddressList[0].ToString();
 
-    return "Hello World! " +myIP;
+
+    ipInfo.PrivateIp = myIP;
+    ipInfo.HostName = hostName;
+    ipInfo.PublicIp = request.HttpContext.Connection?.RemoteIpAddress?.ToString();
+
+    return ipInfo;
 });
 
 app.MapGet("/todoitems", async (TodoDb db) =>
@@ -69,6 +75,14 @@ class Todo
     public int Id { get; set; }
     public string? Name { get; set; }
     public bool IsComplete { get; set; }
+}
+
+class IpInfo
+{
+    public string? PrivateIp { get; set; }
+    public string? HostName { get; set; }
+    public string? PublicIp { get; set; }
+
 }
 
 class TodoDb : DbContext
