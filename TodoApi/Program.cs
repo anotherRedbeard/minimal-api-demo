@@ -2,6 +2,7 @@ using System.Net;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Net.Sockets;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<TodoDb>(opt => opt.UseInMemoryDatabase("TodoList"));
@@ -16,11 +17,14 @@ app.MapGet("/", (HttpRequest request) =>
     // Get the private IP
     var allIps = Dns.GetHostEntry(hostName).AddressList.Where(x => x.AddressFamily == AddressFamily.InterNetwork);
     string myIP = string.Join(",",allIps.Select(x => x.ToString()));
+    var foo = request.HttpContext.Features.Get<IHttpConnectionFeature>();
+    var localIp = foo?.LocalIpAddress?.ToString();
 
 
     ipInfo.PrivateIp = myIP;
     ipInfo.HostName = hostName;
-    ipInfo.PublicIp = request.HttpContext.Connection?.RemoteIpAddress?.ToString();
+    ipInfo.PublicRemoteIp = request.HttpContext.Connection?.RemoteIpAddress?.ToString();
+    ipInfo.PublicLocalIp = request.HttpContext.Connection?.LocalIpAddress?.ToString() + "," + localIp;
 
     return ipInfo;
 });
@@ -84,7 +88,8 @@ class IpInfo
 {
     public string? PrivateIp { get; set; }
     public string? HostName { get; set; }
-    public string? PublicIp { get; set; }
+    public string? PublicRemoteIp { get; set; }
+    public string? PublicLocalIp { get; set; }
 
 }
 
