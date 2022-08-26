@@ -9,7 +9,7 @@ builder.Services.AddDbContext<TodoDb>(opt => opt.UseInMemoryDatabase("TodoList")
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 var app = builder.Build();
 
-app.MapGet("/", (HttpRequest request) => 
+app.MapGet("/", async (HttpRequest request) => 
 {
     var ipInfo = new IpInfo();
     string hostName = Dns.GetHostName(); // Retrive the Name of HOST
@@ -20,11 +20,16 @@ app.MapGet("/", (HttpRequest request) =>
     var foo = request.HttpContext.Features.Get<IHttpConnectionFeature>();
     var localIp = foo?.LocalIpAddress?.ToString();
 
+    //make another request
+    using var client = new HttpClient();
+    var result = await client.GetStringAsync("https://icanhazip.com/");
+
 
     ipInfo.PrivateIp = myIP;
     ipInfo.HostName = hostName;
     ipInfo.PublicRemoteIp = request.HttpContext.Connection?.RemoteIpAddress?.ToString();
     ipInfo.PublicLocalIp = request.HttpContext.Connection?.LocalIpAddress?.ToString() + "," + localIp;
+    ipInfo.ICanHazIp = result;
 
     return ipInfo;
 });
@@ -90,6 +95,7 @@ class IpInfo
     public string? HostName { get; set; }
     public string? PublicRemoteIp { get; set; }
     public string? PublicLocalIp { get; set; }
+    public string? ICanHazIp { get; set; }
 
 }
 
