@@ -16,20 +16,15 @@ app.MapGet("/", async (HttpRequest request) =>
     Console.WriteLine(hostName);
     // Get the private IP
     var allIps = Dns.GetHostEntry(hostName).AddressList.Where(x => x.AddressFamily == AddressFamily.InterNetwork);
-    string myIP = string.Join(",",allIps.Select(x => x.ToString()));
-    var foo = request.HttpContext.Features.Get<IHttpConnectionFeature>();
-    var localIp = foo?.LocalIpAddress?.ToString();
+    var myIP = allIps.FirstOrDefault();
 
     //make another request
     using var client = new HttpClient();
     var result = await client.GetStringAsync("https://icanhazip.com/");
 
-
-    ipInfo.PrivateIp = myIP;
+    ipInfo.PrivateIp = myIP?.ToString();
     ipInfo.HostName = hostName;
-    ipInfo.PublicRemoteIp = request.HttpContext.Connection?.RemoteIpAddress?.ToString();
-    ipInfo.PublicLocalIp = request.HttpContext.Connection?.LocalIpAddress?.ToString() + "," + localIp;
-    ipInfo.ICanHazIp = result;
+    ipInfo.ICanHazIp = result.Replace("\n","");
 
     return ipInfo;
 });
@@ -93,8 +88,6 @@ class IpInfo
 {
     public string? PrivateIp { get; set; }
     public string? HostName { get; set; }
-    public string? PublicRemoteIp { get; set; }
-    public string? PublicLocalIp { get; set; }
     public string? ICanHazIp { get; set; }
 
 }
