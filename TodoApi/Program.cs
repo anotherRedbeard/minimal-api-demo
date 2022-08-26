@@ -1,5 +1,7 @@
 using System.Net;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Net.Sockets;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<TodoDb>(opt => opt.UseInMemoryDatabase("TodoList"));
@@ -12,7 +14,8 @@ app.MapGet("/", (HttpRequest request) =>
     string hostName = Dns.GetHostName(); // Retrive the Name of HOST
     Console.WriteLine(hostName);
     // Get the private IP
-    string myIP = Dns.GetHostEntry(hostName).AddressList[0].ToString();
+    var allIps = Dns.GetHostEntry(hostName).AddressList.Where(x => x.AddressFamily == AddressFamily.InterNetwork);
+    string myIP = string.Join(",",allIps.Select(x => x.ToString()));
 
 
     ipInfo.PrivateIp = myIP;
