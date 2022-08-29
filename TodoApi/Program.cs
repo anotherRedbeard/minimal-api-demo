@@ -25,6 +25,8 @@ app.MapGet("/", async (HttpRequest request) =>
     ipInfo.PrivateIp = myIP?.ToString();
     ipInfo.HostName = hostName;
     ipInfo.ICanHazIp = result.Replace("\n","");
+    ipInfo.RemoteIp = request.HttpContext.Connection.RemoteIpAddress?.ToString();
+    ipInfo.LocalIp = request.HttpContext.Connection.LocalIpAddress?.ToString();
 
     return ipInfo;
 });
@@ -89,6 +91,8 @@ class IpInfo
     public string? PrivateIp { get; set; }
     public string? HostName { get; set; }
     public string? ICanHazIp { get; set; }
+    public string? RemoteIp { get; set; }
+    public string? LocalIp { get; set; }
 
 }
 
