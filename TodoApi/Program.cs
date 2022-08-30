@@ -27,7 +27,7 @@ app.MapGet("/", async (HttpRequest request) =>
     ipInfo.ICanHazIp = result.Replace("\n","");
     ipInfo.RemoteIp = request.HttpContext.Connection.RemoteIpAddress?.ToString();
     ipInfo.LocalIp = request.HttpContext.Connection.LocalIpAddress?.ToString();
-    ipInfo.HeadersCommaDelimited = request.Headers.ToString();
+    ipInfo.HeadersCommaDelimited = string.Join("||",request.Headers.Select(x => $"{x.Key}:{x.Value}"));
 
     return ipInfo;
 });
