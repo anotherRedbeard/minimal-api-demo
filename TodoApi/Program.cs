@@ -18,6 +18,13 @@ app.MapGet("/", async (HttpRequest request) =>
     var allIps = Dns.GetHostEntry(hostName).AddressList.Where(x => x.AddressFamily == AddressFamily.InterNetwork);
     var myIP = allIps.FirstOrDefault();
 
+    // check some header
+    string? ip = request.HttpContext.GetServerVariable("HTTP_X_FORWARDED_FOR");  
+    if (string.IsNullOrEmpty(ip))  
+    {     
+        ip = request.HttpContext.GetServerVariable("REMOTE_ADDR");  
+    }
+
     //make another request
     using var client = new HttpClient();
     var result = await client.GetStringAsync("https://icanhazip.com/");
@@ -26,7 +33,7 @@ app.MapGet("/", async (HttpRequest request) =>
     ipInfo.HostName = hostName;
     ipInfo.ICanHazIp = result.Replace("\n","");
     ipInfo.RemoteIp = request.HttpContext.Connection.RemoteIpAddress?.ToString();
-    ipInfo.LocalIp = request.HttpContext.Connection.LocalIpAddress?.ToString();
+    ipInfo.LocalIp = ip;
     ipInfo.HeadersCommaDelimited = string.Join("||",request.Headers.Select(x => $"{x.Key}:{x.Value}"));
 
     return ipInfo;
