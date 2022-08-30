@@ -16,7 +16,7 @@ app.MapGet("/", async (HttpRequest request) =>
     Console.WriteLine(hostName);
     // Get the private IP
     var allIps = Dns.GetHostEntry(hostName).AddressList.Where(x => x.AddressFamily == AddressFamily.InterNetwork);
-    var myIP = allIps.FirstOrDefault();
+    var myIP = string.Join(',',allIps);
 
     // check some header
     string? ip = request.HttpContext.GetServerVariable("HTTP_X_FORWARDED_FOR");  
