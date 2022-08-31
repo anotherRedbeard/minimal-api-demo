@@ -33,7 +33,7 @@ app.MapGet("/", async (HttpRequest request) =>
     ipInfo.HostName = hostName;
     ipInfo.ICanHazIp = result.Replace("\n","");
     ipInfo.RemoteIp = request.HttpContext.Connection.RemoteIpAddress?.ToString();
-    ipInfo.LocalIp = ip;
+    ipInfo.LocalIp = request.HttpContext.Connection.LocalIpAddress?.ToString();
     ipInfo.HeadersCommaDelimited = string.Join("||",request.Headers.Select(x => $"{x.Key}:{x.Value}"));
 
     return ipInfo;
